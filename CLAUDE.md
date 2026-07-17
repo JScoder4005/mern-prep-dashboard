@@ -20,6 +20,8 @@ Repo: **private**. App name: **PrepDeck**.
 ### Code
 - **TypeScript strict.** No `any` unless justified with a comment. No implicit any.
 - **Central types.** All shared types live in `src/types/*.ts`. Never inline shared types in components.
+- **Functional components only** — never class components unless genuinely required. In Next.js App
+  Router use `error.tsx` for error boundaries, so a class is effectively never needed.
 - **Hooks imported directly** — `useEffect`, `useMemo`, `useCallback` (NOT `React.useEffect`).
 - **`useMemo` / `useCallback` deliberate + commented.** Every use carries an inline comment saying
   *why* (what recompute/re-render it prevents). Do not sprinkle them blindly.
@@ -41,6 +43,8 @@ Repo: **private**. App name: **PrepDeck**.
 - Small commits, conventional messages. Branch off `main`; never commit straight to `main` for features.
 - Verify before claiming done (build/typecheck/lint/test as relevant).
 - Update this checklist immediately after each task is verified.
+- **After every `git push`, update memory** (project status + next step) so a fresh session resumes
+  exactly where we left off. Also refresh the Status Log below.
 
 ---
 
@@ -143,5 +147,7 @@ GitHub Actions.
 ## Status Log
 - 2026-07-18 — design approved; spec written; CLAUDE.md created.
 - 2026-07-18 — Phase 1: repo created (private), Next 16.2 scaffolded, strict tsconfig + prettier done.
-  Dev server runs on **:3001** (3000 was busy). **NEXT:** task 1.0 remainder — shadcn/ui init + base
-  layout/theme — then 1.1 types, 1.2 content pipeline.
+- 2026-07-18 — **Task 1.0 COMPLETE** (pushed `68e0c29`): shadcn/ui (button/card/cn), next-themes +
+  ThemeToggle, PrepDeck homepage (header + hero + 10 static section cards). Dev server **:3001**.
+  **NEXT:** task 1.1 types (`src/types/*`) → 1.2 content pipeline (sync-notes, markdown parse, wikilinks,
+  Shiki, search index) — replace the static section counts in `page.tsx` with real data.
