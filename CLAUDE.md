@@ -55,9 +55,9 @@ GitHub Actions.
 ## PHASE 1 — Dashboard + Docker + CI  `[ in progress ]`
 
 ### 1.0 Setup
-- [ ] Create private GitHub repo `mern-prep-dashboard`
-- [ ] Scaffold Next.js (App Router, TS, Tailwind) via `create-next-app@latest` + pnpm
-- [ ] Configure strict `tsconfig`, ESLint, Prettier
+- [x] Create private GitHub repo `mern-prep-dashboard`
+- [x] Scaffold Next.js (App Router, TS, Tailwind) via `create-next-app@latest` + pnpm — Next 16.2, React 19.2, Tailwind v4
+- [x] Configure strict `tsconfig`, ESLint, Prettier — added noUncheckedIndexedAccess etc; prettier + tailwind plugin
 - [ ] Install shadcn/ui, init, add base components
 - [ ] Base layout, theme tokens, dark/light mode
 - [ ] Commit: chore/scaffold
@@ -141,4 +141,7 @@ GitHub Actions.
 ---
 
 ## Status Log
-- 2026-07-18 — design approved; spec written; CLAUDE.md created. Phase 1 next.
+- 2026-07-18 — design approved; spec written; CLAUDE.md created.
+- 2026-07-18 — Phase 1: repo created (private), Next 16.2 scaffolded, strict tsconfig + prettier done.
+  Dev server runs on **:3001** (3000 was busy). **NEXT:** task 1.0 remainder — shadcn/ui init + base
+  layout/theme — then 1.1 types, 1.2 content pipeline.
