@@ -19,13 +19,19 @@ Repo: **private**. App name: **PrepDeck**.
 
 ### Code
 - **TypeScript strict.** No `any` unless justified with a comment. No implicit any.
-- **Central types.** All shared types live in `src/types/*.ts`. Never inline shared types in components.
 - **Functional components only** — never class components unless genuinely required. In Next.js App
   Router use `error.tsx` for error boundaries, so a class is effectively never needed.
 - **Hooks imported directly** — `useEffect`, `useMemo`, `useCallback` (NOT `React.useEffect`).
 - **`useMemo` / `useCallback` deliberate + commented.** Every use carries an inline comment saying
   *why* (what recompute/re-render it prevents). Do not sprinkle them blindly.
 - **Reusable components, one per file**, single purpose. If a file does two jobs, split it.
+- **Prefer `switch` over long `if/else` ladders** for multi-branch logic (action types, discriminated
+  unions, route/kind dispatch). Always include a `default`; use exhaustive `never` checks on unions.
+- **Feature-based (feature-sliced) folders.** Group by feature, not by file type. Each feature owns its
+  `components/`, `hooks/`, `lib/`, `forms/`, `schema/` (zod), `types/`. Only truly shared code lives at
+  the `src/` top level (`components/ui`, shared layout, `lib`, global `types`). See structure below.
+- **Central types** = shared/global types in `src/types/`; feature-specific types colocated in
+  `src/features/<feature>/types/`.
 - **Server vs Client split explicit.** Server Components by default. `"use client"` only for
   interactivity (search, progress, theme, animation, 3D) and kept as small isolated islands.
 - **Few API calls.** Static-first (SSG). Data read/parsed at build. No runtime call where build-time works.
@@ -53,6 +59,46 @@ Repo: **private**. App name: **PrepDeck**.
 Next.js (latest, App Router, RSC) · TypeScript strict · Tailwind + shadcn/ui · GSAP + @react-three/fiber
 · Shiki · Fuse.js · pnpm · ESLint + Prettier · Vitest + RTL · Docker (alpine, standalone) · Jenkins +
 GitHub Actions.
+
+---
+
+## Folder Structure (feature-sliced)
+
+Group by **feature**, not by file type. A feature is self-contained and only depends on shared code.
+
+```
+src/
+├── app/                      # routes only — thin, compose features (RSC by default)
+│   ├── layout.tsx
+│   ├── page.tsx              # dashboard home
+│   ├── notes/[section]/[slug]/
+│   ├── sections/[section]/
+│   └── progress/
+├── features/                 # ← all domain logic lives here
+│   ├── dashboard/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── forms/            # form UIs
+│   │   ├── schema/           # zod schemas + inferred types
+│   │   ├── lib/
+│   │   └── types/
+│   ├── notes/                # same sub-structure
+│   ├── search/
+│   └── progress/
+├── components/
+│   ├── ui/                   # shadcn primitives (button, card, …)
+│   └── layout/               # shared: header, sidebar, theme-toggle
+├── hooks/                    # shared hooks (useTheme, useGsap)
+├── lib/                      # shared utils (cn, markdown, shiki, wikilinks)
+├── types/                    # truly global types
+content/                      # synced markdown notes
+scripts/                      # sync-notes, build-search-index
+```
+
+Rules: a feature never imports another feature's internals — share via `components/`, `lib/`, `hooks/`,
+`types/`. `schema/` uses **zod**; infer TS types from schemas (`z.infer`) so validation and types stay in sync.
+
+Note: current `src/components/theme-toggle.tsx` etc. move under `components/layout/` when 1.4 lands.
 
 ---
 
