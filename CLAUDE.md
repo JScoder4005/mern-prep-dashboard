@@ -58,9 +58,9 @@ GitHub Actions.
 - [x] Create private GitHub repo `mern-prep-dashboard`
 - [x] Scaffold Next.js (App Router, TS, Tailwind) via `create-next-app@latest` + pnpm — Next 16.2, React 19.2, Tailwind v4
 - [x] Configure strict `tsconfig`, ESLint, Prettier — added noUncheckedIndexedAccess etc; prettier + tailwind plugin
-- [ ] Install shadcn/ui, init, add base components
-- [ ] Base layout, theme tokens, dark/light mode
-- [ ] Commit: chore/scaffold
+- [x] Install shadcn/ui, init, add base components — button, card, `cn` util
+- [x] Base layout, theme tokens, dark/light mode — next-themes + ThemeToggle + PrepDeck homepage (static section grid)
+- [x] Commit: chore/scaffold
 
 ### 1.1 Types
 - [ ] `src/types/note.ts`, `section.ts`, `progress.ts`, `search.ts`
