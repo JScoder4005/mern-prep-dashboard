@@ -123,12 +123,12 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [x] `lib/content/search.ts` — `getSearchDocs()` builder (client index emission wired in 1.4/1.5 search)
 
 ### 1.3 Routes / pages
-- [ ] `/` home — hero, progress stats, section cards
-- [ ] `/notes` — browse + search + filter
-- [ ] `/notes/[section]/[slug]` — note detail + prev/next + backlinks + mark done/revise
-- [ ] `/sections/[section]` — section overview
-- [ ] `/progress` — progress dashboard
-- [ ] `generateStaticParams` for dynamic routes
+- [x] `/` home — hero + section cards (real data)
+- [ ] `/notes` — browse + search + filter (next)
+- [x] `/notes/[section]/[slug]` — note detail: Shiki render, TOC headings, backlinks, prev/next (mark done/revise pending hooks 1.5)
+- [x] `/sections/[section]` — section overview
+- [ ] `/progress` — progress dashboard (needs useProgress 1.5)
+- [x] `generateStaticParams` for dynamic routes (Next 16 async params)
 
 ### 1.4 Components
 - [ ] `Sidebar`, `Breadcrumbs`, `ThemeToggle`

@@ -1,6 +1,5 @@
-import { BookOpen } from "lucide-react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSections } from "@/lib/content/notes";
 
@@ -12,13 +11,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-background/80 px-6 py-4 backdrop-blur">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <BookOpen className="size-5 text-primary" />
-          PrepDeck
-        </Link>
-        <ThemeToggle />
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-16">
         <section className="mb-14 text-center">

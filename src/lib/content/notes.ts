@@ -104,6 +104,14 @@ export function getAllNoteParams(): Array<{ section: string; slug: string }> {
   return loadRawNotes().map((n) => ({ section: n.meta.sectionSlug, slug: n.meta.slug }));
 }
 
+/** Cheap metadata lookup (no markdown render) — for generateMetadata. */
+export function getNoteMeta(sectionSlug: string, slug: string): NoteMeta | null {
+  return (
+    loadRawNotes().find((n) => n.meta.sectionSlug === sectionSlug && n.meta.slug === slug)?.meta ??
+    null
+  );
+}
+
 /** Full note (rendered HTML + headings + backlinks). Async: markdown render is async. */
 export async function getNote(sectionSlug: string, slug: string): Promise<Note | null> {
   const notes = loadRawNotes();

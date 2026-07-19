@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -127,4 +128,33 @@
   html {
     @apply font-sans;
   }
+}
+
+/* --- Shiki dual theme (rehype-pretty-code) ---
+   Each token span carries `--shiki-light` and `--shiki-dark` CSS vars.
+   We pick which one applies based on the `.dark` class on <html>. */
+code[data-theme] span,
+code[data-theme] {
+  color: var(--shiki-light);
+}
+.dark code[data-theme] span,
+.dark code[data-theme] {
+  color: var(--shiki-dark);
+}
+
+/* Code block chrome (keepBackground:false, so we own the background). */
+.prose pre {
+  @apply overflow-x-auto rounded-lg border border-border bg-muted/60 p-4 text-sm;
+}
+.prose pre code {
+  @apply bg-transparent p-0;
+  counter-reset: line;
+}
+/* Inline code */
+.prose :not(pre) > code {
+  @apply rounded bg-muted px-1.5 py-0.5 text-sm font-medium;
+}
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none; /* kill the typography plugin's backtick pseudo-elements */
 }

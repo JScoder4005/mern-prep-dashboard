@@ -7,21 +7,25 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import type { NoteHeading } from "@/types/note";
 
-// One shared processor instance (building it per-call is wasteful). Dual Shiki
-// themes emit CSS variables; globals.css switches them on `.dark`.
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkRehype)
-  .use(rehypePrettyCode, {
-    theme: { dark: "github-dark", light: "github-light" },
-    keepBackground: false,
-  })
-  .use(rehypeStringify);
+// Build a fresh processor per call. rehype-pretty-code holds a stateful Shiki
+// highlighter, so a single shared instance corrupts output when two renders run
+// concurrently (e.g. generateMetadata + the page). A per-call pipeline is safe;
+// the cost is fine for build-time SSG. Dual themes emit CSS vars switched in globals.css.
+function createProcessor() {
+  return unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkRehype)
+    .use(rehypePrettyCode, {
+      theme: { dark: "github-dark", light: "github-light" },
+      keepBackground: false,
+    })
+    .use(rehypeStringify);
+}
 
 /** Render markdown to highlighted HTML. Async because Shiki loads grammars lazily. */
 export async function renderMarkdown(markdown: string): Promise<string> {
-  const file = await processor.process(markdown);
+  const file = await createProcessor().process(markdown);
   return String(file);
 }
 
