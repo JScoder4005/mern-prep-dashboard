@@ -11,6 +11,8 @@ export function ThemeToggle() {
   // `mounted` guard: theme is unknown on the server, so render a stable
   // placeholder until the client hydrates — avoids a hydration mismatch.
   const [mounted, setMounted] = useState(false);
+  // Mount guard: theme is unknowable on the server, so flip after hydration.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional SSR-safe mount flag
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ProgressControls } from "@/features/progress/components/progress-controls";
 import { getAllNoteParams, getNote, getNoteMeta, getSections } from "@/lib/content/notes";
 import type { NoteMeta } from "@/types/note";
 
@@ -54,6 +55,10 @@ export default async function NotePage({ params }: NotePageProps) {
           <ChevronRight className="size-4" />
           <span className="text-foreground">{note.title}</span>
         </nav>
+
+        <div className="mb-8">
+          <ProgressControls slug={note.slug} />
+        </div>
 
         {/* Rendered markdown. `html` is trusted: it's our own build-time content. */}
         <article

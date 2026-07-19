@@ -124,10 +124,10 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 
 ### 1.3 Routes / pages
 - [x] `/` home — hero + section cards (real data)
-- [ ] `/notes` — browse + search + filter (next)
-- [x] `/notes/[section]/[slug]` — note detail: Shiki render, TOC headings, backlinks, prev/next (mark done/revise pending hooks 1.5)
+- [x] `/notes` — browse + Fuse search + section/status filter pills
+- [x] `/notes/[section]/[slug]` — note detail: Shiki render, backlinks, prev/next, done/revise/bookmark
 - [x] `/sections/[section]` — section overview
-- [ ] `/progress` — progress dashboard (needs useProgress 1.5)
+- [x] `/progress` — dashboard: stats, % bar, to-revise/bookmarked/completed lists
 - [x] `generateStaticParams` for dynamic routes (Next 16 async params)
 
 ### 1.4 Components
@@ -139,10 +139,10 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [ ] `Hero3D` (Three.js, lazy)
 
 ### 1.5 Hooks
-- [ ] `useProgress` (localStorage)
-- [ ] `useSearch` (Fuse.js, memoized)
-- [ ] `useTheme`
-- [ ] `useGsap`
+- [x] `useProgress` (localStorage) — status/bookmark + memoized stats
+- [x] `useSearch` (Fuse.js, memoized index + query)
+- [x] `useTheme` — provided by next-themes (used in ThemeToggle)
+- [ ] `useGsap` (with animation, 1.6)
 
 ### 1.6 Animation
 - [ ] GSAP scroll reveals + staggered entrances

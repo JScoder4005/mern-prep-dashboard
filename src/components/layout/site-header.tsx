@@ -10,7 +10,21 @@ export function SiteHeader() {
         <BookOpen className="size-5 text-primary" />
         PrepDeck
       </Link>
-      <ThemeToggle />
+      <nav className="flex items-center gap-1">
+        <Link
+          href="/notes"
+          className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          Browse
+        </Link>
+        <Link
+          href="/progress"
+          className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          Progress
+        </Link>
+        <ThemeToggle />
+      </nav>
     </header>
   );
 }
