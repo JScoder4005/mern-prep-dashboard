@@ -113,14 +113,14 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [x] Commit: chore/scaffold
 
 ### 1.1 Types
-- [ ] `src/types/note.ts`, `section.ts`, `progress.ts`, `search.ts`
+- [x] `src/types/note.ts`, `section.ts`, `progress.ts`, `search.ts`
 
 ### 1.2 Content pipeline
-- [ ] `scripts/sync-notes.ts` — copy `.md` from vault into `content/`
-- [ ] `lib/markdown.ts` — read file, derive title/section/slug
-- [ ] `lib/wikilinks.ts` — transform `[[X]]` → internal links
-- [ ] Shiki highlighting integrated (build-time)
-- [ ] `lib/search-index.ts` — build `search-index.json`
+- [x] `scripts/sync-notes.ts` — copy `.md` from vault into `content/` (74 notes synced)
+- [x] `lib/content/{slug,notes}.ts` — read file, derive title/section/slug; loader + cache + backlinks
+- [x] `lib/content/wikilinks.ts` — transform `[[X]]` → internal links (+ extract targets for backlinks)
+- [x] Shiki highlighting integrated (build-time) — `lib/content/markdown.ts` dual github light/dark themes
+- [x] `lib/content/search.ts` — `getSearchDocs()` builder (client index emission wired in 1.4/1.5 search)
 
 ### 1.3 Routes / pages
 - [ ] `/` home — hero, progress stats, section cards
