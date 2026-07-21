@@ -134,19 +134,19 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [ ] `Sidebar`, `Breadcrumbs`, `ThemeToggle`
 - [ ] `SectionCard`, `NoteCard`, `Badge`, `Tag`
 - [ ] `ProgressRing`, `PrevNextNav`, `CodeBlock`
-- [ ] `SearchBar` (client)
-- [ ] `Reveal` (GSAP client wrapper)
-- [ ] `Hero3D` (Three.js, lazy)
+- [x] `SearchBar` — built into NotesBrowser (inline filter; standalone palette optional later)
+- [x] `Reveal` (GSAP client wrapper) — scroll fade/slide, reduced-motion aware
+- [x] `Hero3D` (Three.js particle field) + `HeroBackdrop` lazy loader (ssr:false)
 
 ### 1.5 Hooks
 - [x] `useProgress` (localStorage) — status/bookmark + memoized stats
 - [x] `useSearch` (Fuse.js, memoized index + query)
 - [x] `useTheme` — provided by next-themes (used in ThemeToggle)
-- [ ] `useGsap` (with animation, 1.6)
+- [x] `useGsap` — via `@gsap/react` `useGSAP` inside the `Reveal` component
 
 ### 1.6 Animation
-- [ ] GSAP scroll reveals + staggered entrances
-- [ ] Three.js hero, lazy, reduced-motion aware
+- [x] GSAP scroll reveals + staggered entrances (`Reveal`, ScrollTrigger, staggered delays on home)
+- [x] Three.js hero, lazy, reduced-motion aware (`Hero3D` particle field, dynamic ssr:false)
 
 ### 1.7 Tests
 - [ ] Vitest + RTL setup
