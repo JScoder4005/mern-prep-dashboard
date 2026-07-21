@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { extractCode } from "@/features/playground/lib/extract-code";
 import { runJs } from "@/features/playground/lib/run-js";
 import type { LogLine } from "@/features/playground/types";
 
@@ -41,7 +42,7 @@ export function RunnableNote({ html }: { html: string }) {
       const lang = (pre.getAttribute("data-language") ?? "").toLowerCase();
       if (!RUNNABLE.has(lang)) return;
 
-      const code = pre.textContent ?? "";
+      const code = extractCode(pre);
       const figure = pre.closest("[data-rehype-pretty-code-figure]") ?? pre;
 
       const output = document.createElement("pre");
