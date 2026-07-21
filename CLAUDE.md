@@ -182,14 +182,19 @@ Decision: **Hybrid** — inline Run on JS blocks in notes + standalone `/playgro
 
 ---
 
-## PHASE 3 — AI Tutor  `[ not started ]`
-- [ ] Spec Phase 3
-- [ ] Embed notes → vector store (RAG)
-- [ ] Chat UI
-- [ ] Bring-your-own-key (Claude/OpenAI) + local Ollama option
-- [ ] Server actions / Express proxy
-- [ ] Quiz + grade mode
-- [ ] Tests + docs
+## PHASE 3 — AI Tutor  `[ in progress ]`
+Decisions: **client BYOK** (key in localStorage, browser→provider direct, no server) · providers
+**Claude + OpenAI + Ollama** · retrieval = **Fuse keyword RAG** (reuse search index, top-k into prompt) ·
+`/tutor` page. Default to latest Claude models (load `claude-api` skill before writing the Anthropic client).
+- [x] Decisions locked
+- [x] 3.1 Types + `useAiSettings` (provider/apiKey/model/ollamaUrl in localStorage; default model claude-opus-4-8)
+- [x] 3.2 Retrieval — `retrieve(query, docs, k)` top-k notes → context + citations
+- [x] 3.3 LLM client — `streamChat()`: Claude via `@anthropic-ai/sdk` (browser BYOK), OpenAI + Ollama via fetch streaming
+- [x] 3.4 Chat UI — `/tutor` page: streaming messages, citations, SettingsPanel, header nav link
+- [x] 3.5 System prompt with retrieved context + citations
+- [x] 3.6 Tests (retrieve top-k / citations — 25 total)
+- [x] 3.7 Verify (typecheck+lint+test+build green)
+- [ ] 3.8 (later) Quiz + grade mode
 
 ---
 

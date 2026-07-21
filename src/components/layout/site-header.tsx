@@ -24,6 +24,12 @@ export function SiteHeader() {
           Playground
         </Link>
         <Link
+          href="/tutor"
+          className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          Tutor
+        </Link>
+        <Link
           href="/progress"
           className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
         >
