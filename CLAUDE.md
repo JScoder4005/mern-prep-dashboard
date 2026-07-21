@@ -164,9 +164,10 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [ ] Verify Jenkins pipeline green locally (needs Docker Desktop — user runs, guided by JENKINS.md)
 
 ### 1.10 Polish + ship
-- [ ] README (screenshots, run instructions)
-- [ ] Lighthouse pass (perf/a11y)
-- [ ] Final commit + push
+- [x] README (features, stack, structure, docker, CI, roadmap, live link)
+- [x] Deployed live on Netlify → https://prepdeck-mern.netlify.app
+- [ ] Lighthouse pass (perf/a11y) — optional
+- [x] Final commit + push
 
 ---
 

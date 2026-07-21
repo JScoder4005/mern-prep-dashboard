@@ -7,7 +7,7 @@ scroll animations, and a subtle 3D hero.
 Built as a **learning vehicle**: Next.js 16 (App Router / RSC), TypeScript (strict), Tailwind + shadcn/ui,
 GSAP + Three.js, Docker, and CI with Jenkins + GitHub Actions.
 
-<!-- Add after deploy: **Live:** https://prepdeck.vercel.app -->
+**🌐 Live:** https://prepdeck-mern.netlify.app
 
 ---
 
@@ -102,8 +102,9 @@ Multi-stage alpine build using Next.js `output: "standalone"` — a small, non-r
 
 ## Deploy
 
-Optimized for **Vercel** (zero-config for Next.js) — import the repo and deploy. Netlify works too via
-its Next.js runtime.
+Deployed on **Netlify** (Next.js runtime) — see [`netlify.toml`](netlify.toml).
+`output: "standalone"` is enabled only for Docker (`DOCKER_BUILD=1`), so the hosted build stays default.
+Vercel also works zero-config.
 
 ## Roadmap
 
