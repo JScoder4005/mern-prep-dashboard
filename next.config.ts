@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // "standalone" bundles a minimal server + only the needed node_modules into
-  // .next/standalone, so the Docker runtime image stays small (no full deps copy).
-  output: "standalone",
+  // "standalone" is only for the Docker image (minimal self-contained server).
+  // On Vercel/Netlify the platform's own Next runtime handles output, so we
+  // leave it default there. The Dockerfile sets DOCKER_BUILD=1.
+  output: process.env.DOCKER_BUILD ? "standalone" : undefined,
 };
 
 export default nextConfig;

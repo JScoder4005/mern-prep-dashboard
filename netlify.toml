@@ -1,0 +1,6 @@
+[build]
+  command = "pnpm build"
+
+# Netlify's Next.js runtime handles routing, SSR/SSG, and the publish directory.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

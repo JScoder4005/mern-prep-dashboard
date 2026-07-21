@@ -15,6 +15,8 @@ RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Enables output:"standalone" in next.config for the container image.
+ENV DOCKER_BUILD=1
 RUN pnpm build
 
 # ── runner ── minimal production image (no dev deps, no source, non-root)
