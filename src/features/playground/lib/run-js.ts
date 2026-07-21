@@ -17,12 +17,18 @@ self.onmessage = function (e) {
     };
   };
   var sandboxConsole = { log: push('log'), info: push('info'), warn: push('warn'), error: push('error') };
+  var posted = false;
+  var post = function () { if (posted) return; posted = true; self.postMessage(logs); };
   try {
     (function (console) { "use strict"; eval(e.data); })(sandboxConsole);
   } catch (err) {
     logs.push({ kind: 'error', text: (err && err.message) ? String(err.message) : String(err) });
+    post();
+    return;
   }
-  self.postMessage(logs);
+  // Let queued microtasks (Promise.then) and short timers (setTimeout(...,0))
+  // flush so async console output is captured, then report.
+  setTimeout(post, 60);
 };
 `;
 
