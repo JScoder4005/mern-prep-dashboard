@@ -1,0 +1,15 @@
+# Never copy these into the build context (smaller, faster, safer builds)
+node_modules
+.next
+.git
+.gitignore
+npm-debug.log*
+Dockerfile
+.dockerignore
+.env*
+coverage
+.vscode
+docs
+CLAUDE.md
+README.md
+*.log

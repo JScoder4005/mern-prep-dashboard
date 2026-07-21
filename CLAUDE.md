@@ -153,15 +153,15 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [x] Tests (18 passing): slug, wikilinks, markdown helpers, useProgress hook, NotesBrowser search/filter
 
 ### 1.8 Docker
-- [ ] `next.config` → `output: "standalone"`
-- [ ] Multi-stage alpine `Dockerfile` + `.dockerignore`
-- [ ] Verify `docker build` + `docker run`
+- [x] `next.config` → `output: "standalone"`
+- [x] Multi-stage alpine `Dockerfile` + `.dockerignore`
+- [ ] Verify `docker build` + `docker run` (needs Docker Desktop — user runs; `pnpm build` already green)
 
 ### 1.9 CI/CD
-- [ ] `.github/workflows/ci.yml` (lint/typecheck/test/build)
-- [ ] `Jenkinsfile` pipeline
-- [ ] `docs/JENKINS.md` — Jenkins-in-Docker guided setup
-- [ ] Verify Jenkins pipeline green locally
+- [x] `.github/workflows/ci.yml` (lint/typecheck/test/build)
+- [x] `Jenkinsfile` pipeline
+- [x] `docs/JENKINS.md` — Jenkins-in-Docker guided setup
+- [ ] Verify Jenkins pipeline green locally (needs Docker Desktop — user runs, guided by JENKINS.md)
 
 ### 1.10 Polish + ship
 - [ ] README (screenshots, run instructions)
