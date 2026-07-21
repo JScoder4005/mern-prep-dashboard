@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout/site-header";
+import { RunnableNote } from "@/features/playground/components/runnable-note";
 import { ProgressControls } from "@/features/progress/components/progress-controls";
 import { getAllNoteParams, getNote, getNoteMeta, getSections } from "@/lib/content/notes";
 import type { NoteMeta } from "@/types/note";
@@ -60,11 +61,8 @@ export default async function NotePage({ params }: NotePageProps) {
           <ProgressControls slug={note.slug} />
         </div>
 
-        {/* Rendered markdown. `html` is trusted: it's our own build-time content. */}
-        <article
-          className="prose prose-neutral max-w-none dark:prose-invert prose-pre:p-0"
-          dangerouslySetInnerHTML={{ __html: note.html }}
-        />
+        {/* Rendered markdown + inline "Run" on JS code blocks (client enhancer). */}
+        <RunnableNote html={note.html} />
 
         {note.backlinks.length > 0 && (
           <section className="mt-12 border-t border-border pt-6">

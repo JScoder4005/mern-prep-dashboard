@@ -171,12 +171,14 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 
 ---
 
-## PHASE 2 — Code Playground  `[ not started ]`
-- [ ] Spec Phase 2
-- [ ] JS/DSA runner in Web Worker (safe eval)
-- [ ] React live preview via Sandpack
-- [ ] Embed "Run" in note code blocks
-- [ ] Tests + docs
+## PHASE 2 — Code Playground  `[ in progress ]`
+Decision: **Hybrid** — inline Run on JS blocks in notes + standalone `/playground` for React. JS + React.
+- [x] Direction chosen (hybrid, JS+React)
+- [x] 2.1 JS/DSA runner in Web Worker (Blob worker, console capture, 3s timeout) — `features/playground/lib/run-js.ts`
+- [x] 2.2 Inline "Run" on note `js` code blocks — `RunnableNote` (client DOM enhancer)
+- [ ] 2.3 `/playground` page — React live preview via Sandpack (+ JS template), header nav link
+- [ ] 2.4 Tests (run-js output formatting / worker mock)
+- [ ] 2.5 Verify (typecheck+lint+test+build) + deploy
 
 ---
 
