@@ -44,7 +44,8 @@ export default async function SectionPage({ params }: SectionPageProps) {
           {found.notes.map((note) => (
             <li key={note.slug}>
               <Link href={note.href}>
-                <Card className="transition-colors hover:border-primary/50 hover:bg-accent/40">
+                <Card className="group relative overflow-hidden border-border/60 bg-gradient-to-br from-card to-muted/40 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                   <CardHeader>
                     <CardTitle className="text-base">{note.title}</CardTitle>
                   </CardHeader>

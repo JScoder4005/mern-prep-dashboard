@@ -18,6 +18,8 @@ export default function Home() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-16">
         <section className="relative mb-16 flex min-h-[280px] flex-col items-center justify-center overflow-hidden text-center">
           <HeroBackdrop />
+          {/* Soft radial glow behind the title — reads in both themes. */}
+          <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-64 w-[36rem] max-w-full -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
           <h1 className="bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl">
             Senior MERN Interview Prep
           </h1>
@@ -30,7 +32,9 @@ export default function Home() {
           {sections.map((section, i) => (
             <Reveal key={section.slug} delay={i * 0.05}>
               <Link href={section.href}>
-                <Card className="h-full transition-colors hover:border-primary/50 hover:bg-accent/40">
+                <Card className="group relative h-full overflow-hidden border-border/60 bg-gradient-to-br from-card to-muted/40 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+                  {/* Gradient accent line, revealed on hover. */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>{section.title}</CardTitle>

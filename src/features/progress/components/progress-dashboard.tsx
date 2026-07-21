@@ -44,7 +44,10 @@ export function ProgressDashboard({ notes }: ProgressDashboardProps) {
       </section>
 
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all"
+          style={{ width: `${pct}%` }}
+        />
       </div>
 
       <NoteList title="To revise" notes={toRevise} empty="Nothing marked for revision." />
@@ -56,8 +59,10 @@ export function ProgressDashboard({ notes }: ProgressDashboardProps) {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-border p-4">
-      <div className="text-2xl font-bold">{value}</div>
+    <div className="rounded-lg border border-border/60 bg-gradient-to-br from-card to-muted/40 p-4">
+      <div className="bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-2xl font-bold text-transparent">
+        {value}
+      </div>
       <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   );

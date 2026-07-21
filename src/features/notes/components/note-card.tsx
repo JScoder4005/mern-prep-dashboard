@@ -31,7 +31,8 @@ function statusDot(status: NoteStatus): string {
 export function NoteCard({ note, status, bookmarked }: NoteCardProps) {
   return (
     <Link href={note.href}>
-      <Card className="h-full transition-colors hover:border-primary/50 hover:bg-accent/40">
+      <Card className="group relative h-full overflow-hidden border-border/60 bg-gradient-to-br from-card to-muted/40 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-base leading-snug">{note.title}</CardTitle>
