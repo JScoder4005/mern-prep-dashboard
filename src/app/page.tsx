@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Reveal } from "@/components/layout/reveal";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HeroBackdrop } from "@/features/dashboard/components/hero-backdrop";
+import { HeroBoard } from "@/features/dashboard/components/hero-board";
 import { getSections } from "@/lib/content/notes";
 
 // Server Component: reads the parsed notes at build time. No client JS shipped
@@ -16,14 +16,11 @@ export default function Home() {
       <SiteHeader />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-16">
-        <section className="relative mb-16 flex min-h-[280px] flex-col items-center justify-center overflow-hidden text-center">
-          <HeroBackdrop />
-          {/* Soft radial glow behind the title — reads in both themes. */}
-          <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-64 w-[36rem] max-w-full -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
-          <h1 className="bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl">
-            Senior MERN Interview Prep
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+        <section className="mb-16 flex flex-col items-center gap-8 py-6 text-center">
+          {/* Real heading for a11y/SEO; the animated board shows it visually. */}
+          <h1 className="sr-only">Senior MERN Interview Prep</h1>
+          <HeroBoard />
+          <p className="mx-auto max-w-xl text-lg text-muted-foreground">
             {total} deeply-explained notes across {sections.length} sections. Study, search, revise.
           </p>
         </section>
