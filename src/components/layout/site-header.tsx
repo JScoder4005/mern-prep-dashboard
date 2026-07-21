@@ -18,6 +18,12 @@ export function SiteHeader() {
           Browse
         </Link>
         <Link
+          href="/playground"
+          className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          Playground
+        </Link>
+        <Link
           href="/progress"
           className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
         >

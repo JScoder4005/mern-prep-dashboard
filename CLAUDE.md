@@ -171,14 +171,14 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 
 ---
 
-## PHASE 2 — Code Playground  `[ in progress ]`
+## PHASE 2 — Code Playground  `[ COMPLETE ]`
 Decision: **Hybrid** — inline Run on JS blocks in notes + standalone `/playground` for React. JS + React.
 - [x] Direction chosen (hybrid, JS+React)
 - [x] 2.1 JS/DSA runner in Web Worker (Blob worker, console capture, 3s timeout) — `features/playground/lib/run-js.ts`
 - [x] 2.2 Inline "Run" on note `js` code blocks — `RunnableNote` (client DOM enhancer)
-- [ ] 2.3 `/playground` page — React live preview via Sandpack (+ JS template), header nav link
-- [ ] 2.4 Tests (run-js output formatting / worker mock)
-- [ ] 2.5 Verify (typecheck+lint+test+build) + deploy
+- [x] 2.3 `/playground` page — React live preview via Sandpack (react-ts + vanilla JS toggle), header nav link
+- [x] 2.4 Tests — run-js fallback path (19 tests total)
+- [x] 2.5 Verify (typecheck+lint+test+build) green
 
 ---
 
