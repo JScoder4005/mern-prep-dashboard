@@ -149,8 +149,8 @@ Note: current `src/components/theme-toggle.tsx` etc. move under `components/layo
 - [x] Three.js hero, lazy, reduced-motion aware (`Hero3D` particle field, dynamic ssr:false)
 
 ### 1.7 Tests
-- [ ] Vitest + RTL setup
-- [ ] Tests: markdown parse, wikilink transform, useProgress, SearchBar
+- [x] Vitest + RTL setup (jsdom, jest-dom, `@` alias, `test`/`test:watch` scripts)
+- [x] Tests (18 passing): slug, wikilinks, markdown helpers, useProgress hook, NotesBrowser search/filter
 
 ### 1.8 Docker
 - [ ] `next.config` → `output: "standalone"`
