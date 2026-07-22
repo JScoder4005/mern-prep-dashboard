@@ -16,9 +16,19 @@ function renderOutput(out: HTMLElement, logs: LogLine[]) {
   }
   for (const line of logs) {
     const row = document.createElement("div");
-    row.textContent = line.text;
-    if (line.kind === "error") row.className = "text-red-500";
-    else if (line.kind === "warn") row.className = "text-amber-500";
+    if (line.kind === "error") {
+      row.textContent = line.text;
+      row.className = "text-red-500";
+    } else if (line.kind === "warn") {
+      row.textContent = line.text;
+      row.className = "text-amber-500";
+    } else if (line.kind === "result") {
+      // REPL echo of a snippet's completion value — dimmed, arrow-prefixed.
+      row.textContent = `→ ${line.text}`;
+      row.className = "text-muted-foreground";
+    } else {
+      row.textContent = line.text;
+    }
     out.appendChild(row);
   }
 }

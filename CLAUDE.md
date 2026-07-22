@@ -205,3 +205,11 @@ Decisions: **client BYOK** (key in localStorage, browser→provider direct, no s
   ThemeToggle, PrepDeck homepage (header + hero + 10 static section cards). Dev server **:3001**.
   **NEXT:** task 1.1 types (`src/types/*`) → 1.2 content pipeline (sync-notes, markdown parse, wikilinks,
   Shiki, search index) — replace the static section counts in `page.tsx` with real data.
+- 2026-07-22 — **Playground REPL auto-echo** (spec `docs/superpowers/specs/2026-07-22-playground-repl-autoecho-design.md`):
+  inline "Run" now echoes the completion value of the last statement when a snippet logs nothing
+  (`Math.max(...[1,2,3])` → `→ 3`), killing the old silent "(no output)". `run-js.ts` captures
+  `eval`'s return value; pure `fmtValue` + `appendResultLine` exported & unit-tested (jsdom has no
+  Worker); `fmtValue` injected into the worker Blob via `.toString()` (self-contained → minify-safe).
+  `LogKind` gained `"result"`; `runnable-note.tsx` renders it dimmed + `→` prefix. ReferenceError from
+  fragment snippets stays raw red (product decision). 33 tests green; typecheck/lint/build clean.
+  Content rewrite of terse note answers = deferred separate project.
