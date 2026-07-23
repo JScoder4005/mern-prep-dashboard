@@ -1,84 +1,75 @@
 # JavaScript — ES6+ Modern Features
 
 ## Q
-Key ES6+ features you use daily? Destructuring, spread/rest, optional chaining, Map/Set, Proxy.
+Which ES6+ features do you use daily, and what problem does each solve?
 
-## A
-Modern JS syntax that makes code shorter + safer. Interviewers expect fluent use.
+## Answer
+The ones I lean on constantly: destructuring and spread/rest for pulling values out of and merging objects/arrays; optional chaining (`?.`) and nullish coalescing (`??`) to kill null-check boilerplate without swallowing valid falsy values; `Map`/`Set` for keyed lookups and dedup; template literals for readable strings; and `Object.entries/fromEntries` for transforming objects. They make code shorter *and* safer — interviewers expect fluent, idiomatic use, not just recognition.
+
+## How it works
+- **Destructuring** binds properties/elements by pattern; defaults fill in for `undefined` (not `null`), and you can rename and go nested in one statement.
+- **Spread** does a *shallow* copy/merge — later keys win, nested objects are still shared by reference. **Rest** collects "everything else" into an array or object.
+- **`?.`** short-circuits to `undefined` the moment any link is nullish, so no `TypeError`. **`??`** falls back only on `null`/`undefined`, unlike `||`, which also triggers on `0`, `""`, and `false`.
+- **`Map`** allows any key type, preserves insertion order, and exposes `.size`; **`Set`** stores unique values — ideal for dedup.
 
 ## Code
-Destructuring:
+Destructuring — rename, default, nested, swap:
 ```js
-const { name, age = 18 } = user;        // default value
-const { address: { city } } = user;     // nested
-const [first, , third] = arr;           // skip
-const { a, ...rest } = obj;             // rest of object
-function fn({ id, name }) {}             // param destructuring
+const user = { id: 1, name: "Ada", address: { city: "London" } };
+const { name, role = "guest" } = user; // default fills missing key
+const { address: { city } } = user;    // nested
+let a = 1, b = 2;
+[a, b] = [b, a];                        // swap, no temp
+console.log(name, role, city, a, b);    // Ada guest London 2 1
 ```
 
-Spread / rest:
+Spread / rest — shallow merge, collect the rest:
 ```js
-const merged = { ...obj1, ...obj2 };     // shallow merge (later wins)
-const combined = [...arr1, ...arr2];
-const clone = [...arr];                  // shallow copy
-function sum(...nums) { return nums.reduce((a, b) => a + b, 0); } // rest
-Math.max(...[1, 2, 3]);                  // spread as args
+const base = { theme: "dark", zoom: 1 };
+const merged = { ...base, zoom: 2 };     // later wins
+const { theme, ...rest } = merged;       // rest = { zoom: 2 }
+const sum = (...nums) => nums.reduce((t, n) => t + n, 0);
+console.log(merged, rest, sum(1, 2, 3)); // {theme:'dark',zoom:2} {zoom:2} 6
 ```
 
-Optional chaining + nullish:
+Optional chaining vs nullish — and the `||` trap:
 ```js
-user?.address?.city;                     // undefined if any null, no throw
-user?.getName?.();                       // safe method call
-arr?.[0];                                // safe index
-const port = config.port ?? 3000;        // only null/undefined -> default
+const config = { port: 0, db: { host: "localhost" } };
+console.log(config?.db?.host);   // localhost
+console.log(config?.cache?.ttl); // undefined (no throw)
+console.log(config.port ?? 3000); // 0  — kept, ?? only replaces null/undefined
+console.log(config.port || 3000); // 3000 — bug: 0 is falsy
 ```
 
-Template literals:
+Map / Set — lookup + dedup:
 ```js
-`Hello ${name}, you have ${count} items`;
+const seen = new Map([["a", 1]]);
+seen.set("b", 2);
+const nums = [1, 1, 2, 3, 3];
+console.log(seen.get("a"), seen.size, [...new Set(nums)]); // 1 2 [1,2,3]
 ```
 
-Map / Set / WeakMap:
+Object helpers, template literals, computed keys:
 ```js
-const map = new Map([["a", 1]]);         // any key type, ordered, .size
-map.get("a"); map.set("b", 2); map.has("a");
-const set = new Set([1, 1, 2]);          // unique -> {1,2}
-[...new Set(arr)];                        // dedup
-const wm = new WeakMap();                 // keys GC'd when unreferenced (no leak)
+const prices = { pen: 2, book: 5 };
+const doubled = Object.fromEntries(
+  Object.entries(prices).map(([k, v]) => [k, v * 2]),
+);
+const key = "score";
+const player = { name: "Ada", [key]: 42 };        // computed property name
+console.log(doubled, `${player.name}:${player[key]}`); // {pen:4,book:10} Ada:42
 ```
 
-Object shorthand + computed keys:
-```js
-const key = "dynamic";
-const obj = { name, age, [key]: 1, greet() {} };
-```
+## Gotchas
+- `??` vs `||`: use `??` for defaults when `0`, `""`, or `false` are valid values — `||` silently replaces them.
+- Spread is **shallow**: `{ ...obj }` copies the top level only; nested objects/arrays stay shared. Deep clone needs `structuredClone` or manual recursion — see [[Deep-Shallow-Copy]].
+- Destructuring defaults apply only to `undefined`, **not** `null`: `const { x = 5 } = { x: null }` yields `null`.
+- Destructuring a `null`/`undefined` value throws; guard with `const { x } = obj ?? {}`.
 
-Proxy (meta-programming):
-```js
-const target = { count: 0 };
-const proxy = new Proxy(target, {
-  get: (obj, prop) => (prop in obj ? obj[prop] : `no ${prop}`),
-  set: (obj, prop, val) => { console.log(`set ${prop}=${val}`); obj[prop] = val; return true; },
-});
-proxy.count = 5;    // logs "set count=5"
-proxy.missing;      // "no missing"
-```
-**Where Proxy:** Vue 3 reactivity, validation, logging, default values.
-
-Array/Object helpers:
-```js
-Object.entries(obj); Object.keys(obj); Object.values(obj);
-Object.fromEntries([["a", 1]]);          // {a:1}
-arr.at(-1);                              // last element
-arr.flatMap((x) => [x, x * 2]);
-arr.findLast((x) => x > 2);
-```
-
-## Why / Where
-- Destructuring + spread everywhere in React (props, state updates).
-- `?.` / `??` kill null-check boilerplate + crashes.
-- `Map`/`Set` for dedup, lookups, ordered keys.
-- `WeakMap` for private data / caches without leaks.
+## Follow-ups
+- **"`?.` vs `&&` chaining?"** `?.` is purpose-built and reads cleaner, and it also guards method calls (`obj.fn?.()`) and indexes (`arr?.[0]`).
+- **"When would `Map` beat a plain object?"** Non-string keys, guaranteed insertion order, frequent add/delete, or needing `.size` in O(1).
+- **"Any meta-programming feature you'd mention?"** `Proxy` + `Reflect` wrap an object to intercept `get`/`set` — it's how Vue 3 reactivity works. `WeakMap` gives leak-free private caches (keys GC'd when unreferenced).
 
 ## Related
 [[Deep-Shallow-Copy]] · [[Iterators-Generators]] · [[Type-Coercion-Equality]]
