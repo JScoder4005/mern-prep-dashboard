@@ -1,44 +1,55 @@
 # Prototype & Inheritance
 
 ## Q
-Explain the prototype chain. Difference between `__proto__` and `prototype`?
+Explain the prototype chain. What's the difference between `__proto__` and `prototype`?
 
-## A
-Every object has a hidden link `[[Prototype]]` (accessed via `__proto__`) pointing to another object. Property lookup walks this **chain** until found or `null`. `prototype` is a property on **constructor functions** used as the `__proto__` of instances they create.
+## Answer
+Every object has a hidden link, `[[Prototype]]`, to another object. When you read a property, the engine checks the object itself, then walks this **prototype chain** — link by link — until it finds the property or hits `null`. `prototype` is a property that lives on **constructor functions**: it's the object that becomes the `[[Prototype]]` of every instance the constructor creates. `__proto__` is the (legacy) accessor for an object's own `[[Prototype]]` link — so `instance.__proto__ === Constructor.prototype`. ES6 `class` is syntactic sugar over exactly this mechanism.
+
+## How it works
+Lookup order for a property: the object's own properties → its `[[Prototype]]` → that object's `[[Prototype]]` → … → `Object.prototype` → `null`. Methods are stored **once** on the prototype and shared by every instance, rather than copied onto each object — that's why prototypes are memory-efficient. Prefer `Object.getPrototypeOf(obj)` / `Object.setPrototypeOf` over the legacy `__proto__` accessor.
 
 ## Code
+Constructor, prototype method, and the chain:
 ```js
 function Person(name) { this.name = name; }
 Person.prototype.hello = function () { return `Hi ${this.name}`; };
-
 const p = new Person("Varun");
-p.hello();                       // found on Person.prototype
-p.__proto__ === Person.prototype; // true
-Person.prototype.__proto__ === Object.prototype; // true
-Object.prototype.__proto__;      // null (chain end)
-
-// Inheritance (ES6 class = syntactic sugar over prototypes)
-class Animal {
-  constructor(name) { this.name = name; }
-  speak() { return `${this.name} makes noise`; }
-}
-class Dog extends Animal {
-  speak() { return `${super.speak()} - woof`; }
-}
-new Dog("Rex").speak(); // "Rex makes noise - woof"
+console.log(p.hello());                             // Hi Varun — found on the prototype
+console.log(Object.getPrototypeOf(p) === Person.prototype); // true
+console.log(Object.getPrototypeOf(Person.prototype) === Object.prototype); // true
+console.log(Object.getPrototypeOf(Object.prototype)); // null — end of the chain
 ```
 
-## How
-Lookup order: own property → `__proto__` → its `__proto__` → ... → `Object.prototype` → `null`.
+`class` inheritance is prototypes under the hood:
+```js
+class Animal {
+  constructor(name) { this.name = name; }
+  speak() { return `${this.name} makes a noise`; }
+}
+class Dog extends Animal {
+  speak() { return `${super.speak()} — woof`; } // super walks up the chain
+}
+console.log(new Dog("Rex").speak()); // Rex makes a noise — woof
+```
 
-## Why
-Memory efficient: methods live once on prototype, shared by all instances (not copied per object).
+Own vs inherited, and a prototype-free dictionary:
+```js
+const dict = Object.create(null); // no prototype — a clean map, no inherited keys
+dict.a = 1;
+console.log(Object.hasOwn(dict, "a"), "toString" in dict); // true false
+```
 
-## Where / Scenario
-- Understanding `Array.prototype.map` — why arrays have `map`.
-- Polyfilling (add method to `Array.prototype`): [[Polyfills]].
-- `hasOwnProperty` vs inherited props check.
-- `Object.create(null)` for a clean dictionary (no proto pollution).
+## Gotchas
+- `prototype` exists on constructor **functions**, not on instances; instances have `__proto__`/`[[Prototype]]`. Mixing them up is the classic wrong answer.
+- Mutating built-in prototypes (`Array.prototype.foo = …`) is global and risky — fine for a controlled polyfill, dangerous otherwise.
+- `for...in` walks inherited enumerable keys too — guard with `Object.hasOwn` (or use `Object.keys`).
+- `Object.create(null)` objects have **no** `toString`/`hasOwnProperty`, so call `Object.hasOwn(obj, k)` rather than `obj.hasOwnProperty(k)`.
+
+## Follow-ups
+- **"Why does an array have `.map`?"** It's inherited from `Array.prototype` via the chain, not stored on each array.
+- **"How do you check own vs inherited?"** `Object.hasOwn(obj, key)` (or the older `obj.hasOwnProperty(key)`).
+- **"class vs prototype — any real difference?"** `class` adds strict-mode bodies, non-enumerable methods, and `super`, but the underlying model is still prototypes.
 
 ## Related
 [[This-Binding]] · [[Polyfills]]

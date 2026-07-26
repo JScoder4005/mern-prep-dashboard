@@ -1,51 +1,58 @@
 # Debounce & Throttle
 
 ## Q
-Implement debounce and throttle. Difference and when to use each?
+Implement debounce and throttle. What's the difference, and when do you use each?
 
-## A
-- **Debounce** — run function only after activity **stops** for N ms. Resets timer on each call. (Wait for pause.)
-- **Throttle** — run function **at most once per N ms**, no matter how many calls. (Fixed rate.)
+## Answer
+Both limit how often an expensive function runs in response to rapid events, using a closure to hold state between calls. **Debounce** waits for activity to *stop*: every call resets a timer, and the function only runs once things go quiet for N ms — ideal for search-as-you-type or autosave. **Throttle** enforces a *fixed rate*: the function runs at most once per N ms no matter how many calls arrive — ideal for scroll, resize, or mousemove handlers where you want steady updates, not a burst.
+
+## How it works
+Both return a wrapper that closes over private state (a timer id for debounce, a last-run timestamp for throttle) — see [[Closures]]. `fn.apply(this, args)` forwards the original `this` and arguments so the throttled/debounced function behaves like the original (see [[This-Binding]]). Debounce cancels the pending timer on each call; throttle checks whether enough time has elapsed since the last run.
 
 ## Code
-Debounce:
+Debounce — collapse a burst into the last call:
 ```js
 function debounce(fn, delay) {
   let timer;
   return function (...args) {
-    clearTimeout(timer);                 // cancel previous
+    clearTimeout(timer);                      // cancel the previous pending run
     timer = setTimeout(() => fn.apply(this, args), delay);
   };
 }
-// usage
-const onSearch = debounce((q) => api(q), 300);
+const search = debounce((q) => console.log("search:", q), 20);
+search("a");
+search("ab");
+search("abc"); // only the last survives the quiet period
+// search: abc
 ```
 
-Throttle (timestamp version):
+Throttle — run at most once per window:
 ```js
 function throttle(fn, limit) {
   let last = 0;
   return function (...args) {
     const now = Date.now();
-    if (now - last >= limit) {
-      last = now;
-      fn.apply(this, args);
-    }
+    if (now - last >= limit) { last = now; fn.apply(this, args); }
   };
 }
-// usage
-const onScroll = throttle(() => console.log("scroll"), 200);
+const onScroll = throttle((x) => console.log("tick", x), 30);
+onScroll(1);                       // runs immediately -> tick 1
+onScroll(2);                       // ignored — inside the 30ms window
+setTimeout(() => onScroll(3), 40); // after the window -> tick 3
+// tick 1
+// tick 3
 ```
 
-## How
-Both use **closure** to hold timer/timestamp state across calls. See [[Closures]]. `apply(this, args)` preserves context + arguments — see [[This-Binding]].
+## Gotchas
+- Debounce with a leading edge (run immediately, then wait) behaves differently from the trailing-edge version above — clarify which one the interviewer wants.
+- Forgetting `fn.apply(this, args)` drops the caller's context and arguments — the wrapped handler then misbehaves on events.
+- A debounced input handler can lose the *final* keystroke's result if the component unmounts before the timer fires — cancel on cleanup.
+- Throttle's timestamp version skips the trailing call; a timer-based version can guarantee the last event still fires.
 
-## Why
-Reduce expensive work (API calls, re-renders, layout) triggered by rapid events.
-
-## Where / Scenario
-- **Debounce** — search-as-you-type, autosave, resize-then-recalc, form validation.
-- **Throttle** — scroll handlers, infinite scroll, mousemove, rate-limit button spam, analytics.
+## Follow-ups
+- **"Which for a search box?"** Debounce — you only want the request after the user pauses typing.
+- **"Which for infinite scroll / mousemove?"** Throttle — you want steady, rate-limited updates.
+- **"How would you cancel a pending debounce?"** Expose a `.cancel()` that does `clearTimeout(timer)`.
 
 ## Related
 [[Closures]] · [[This-Binding]] · [[React-Coding-Questions]]
