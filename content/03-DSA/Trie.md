@@ -59,21 +59,26 @@ class Trie {
 }
 
 const t = new Trie();
-t.insert("cat"); t.insert("car");
-t.search("cat");        // true
-t.startsWith("ca");     // true
-t.autocomplete("ca");   // ["cat", "car"]
+t.insert("cat"); t.insert("car"); t.insert("card");
+console.log(t.search("cat"));      // true  (a stored word)
+console.log(t.search("ca"));       // false (prefix, not a word)
+console.log(t.startsWith("ca"));   // true
+console.log(t.autocomplete("ca")); // ["cat","car","card"]
 ```
 
-## How
-Each char walks one level down. `isEnd` distinguishes "car" (word) from "ca" (prefix only). Autocomplete = find prefix node then DFS collect.
+## How it works
+Each character of a word walks one level deeper, creating child nodes as needed; the final node is flagged `isEnd`. `search` requires the full path **and** `isEnd` (so "ca" fails), while `startsWith` only needs the path to exist. Autocomplete finds the prefix node once, then DFS-collects every `isEnd` beneath it. Because you only ever follow the characters you're given, every operation is O(L) in the word length — completely independent of how many words the trie holds.
 
-## Why
-- Prefix search O(L), not O(N×L) scanning all words.
-- Shares common prefixes → space efficient for large dictionaries.
+## Why use it
+- Prefix search is O(L), not O(N×L) scanning every word in a dictionary.
+- Shared prefixes are stored once → space-efficient for large word sets.
+
+## Gotchas
+- `isEnd` is essential — without it you can't tell a complete word ("car") from a mere prefix ("ca"), so `search` and `startsWith` would collapse into the same thing.
+- A trie can be memory-heavy for sparse, long keys (one node per char). A ternary search tree or a compressed/radix trie trades some speed for space.
 
 ## Where / Scenario
-Autocomplete/typeahead (see [[Autocomplete-Typeahead]]), spell check, IP routing, word games, search suggestions, contact search.
+Autocomplete/typeahead (see [[Autocomplete-Typeahead]]), spell check, IP routing tables, word games, search suggestions, contact search.
 
 ## Related
 [[Trees]] · [[Hashing]] · [[Autocomplete-Typeahead]]
