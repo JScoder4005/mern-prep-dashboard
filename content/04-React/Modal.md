@@ -1,14 +1,17 @@
 # React — Modal / Dialog
 
 ## Q
-Build a reusable modal: render via portal, close on overlay click + Escape, lock body scroll, focus trap, accessible.
+Build a reusable modal: render via portal, close on overlay click + Escape, lock body scroll, trap focus, and stay accessible.
 
-## A
-Use `createPortal` to render outside parent DOM (avoids z-index/overflow clipping). Handle Escape, overlay click, body scroll lock, focus.
+## Answer
+Render the modal through `createPortal` into `document.body` so it escapes any ancestor's `overflow:hidden` or stacking context while staying part of the React tree (props/context intact). The behavioral checklist is what interviewers grade: close on **Escape** and **overlay click** (but not clicks inside the dialog), **lock body scroll** while open, **move focus in** and trap Tab within the dialog, restore focus to the trigger on close, and wire the ARIA roles (`role="dialog"`, `aria-modal`).
+
+## How it works
+`createPortal(node, target)` mounts the DOM node under `target` instead of the parent, which is why a modal buried inside a clipped/low-z-index container still renders on top. The overlay `onClick` closes; `stopPropagation` on the inner box stops that from firing when you click the content. All the imperative side effects (key listener, scroll lock, focus) live in one `useEffect` gated on `isOpen`, with a cleanup that removes the listener and restores scroll — so nothing leaks when the modal unmounts.
 
 ## Code
 ```jsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 function Modal({ isOpen, onClose, title, children }) {
@@ -68,18 +71,16 @@ function App() {
 }
 ```
 
-## How
-`createPortal(node, document.body)` renders the modal at body level (escapes parent `overflow:hidden`/stacking). `stopPropagation` on inner box so overlay-click-close only triggers on the backdrop.
-
-## Why portal
-Modal nested deep inside a component with `overflow:hidden` or low z-index would clip. Portal renders it top-level while keeping React tree/props/context.
-
 ## Gotchas / a11y
-- `role="dialog"` + `aria-modal`.
-- Escape + overlay click to close.
-- Lock body scroll while open.
-- Focus trap (Tab cycles within modal); restore focus to trigger on close.
-- Cleanup listeners on unmount.
+- **Real focus trap:** the snippet moves focus in, but a production modal must also cycle Tab/Shift-Tab within the dialog and **restore focus to the trigger** on close — otherwise keyboard users get dumped at the top of the page.
+- **Scroll lock has a cost:** setting `body.overflow = "hidden"` can cause a layout shift as the scrollbar disappears; compensate with padding equal to the scrollbar width for a jank-free lock.
+- **Always clean up:** remove the `keydown` listener and restore `overflow` in the effect's return, or you leak listeners and leave the page unscrollable after unmount.
+- ARIA: `role="dialog"` + `aria-modal="true"` + a label (`aria-label` or `aria-labelledby` pointing at the title).
+
+## Follow-ups
+- **"Why a portal instead of just `position: fixed`?"** Fixed still lives inside the parent's stacking context and can be clipped by an ancestor `overflow`/`transform`; a portal renders at body level, sidestepping both.
+- **"Does a portal break event bubbling?"** No — React events bubble through the **React tree**, not the DOM tree, so a click inside the portal still reaches ancestors in JSX.
+- **"How would you animate exit?"** Keep the node mounted during the closing transition (an `isClosing` state) and unmount on `transitionend`, since React removes portals instantly otherwise.
 
 ## Related
-[[React-Coding-Questions]] · [[Hooks]]
+[[React-Coding-Questions]] · [[Hooks]] · [[Toast-Notifications]]

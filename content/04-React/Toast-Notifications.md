@@ -3,8 +3,8 @@
 ## Q
 Build a toast system: trigger from anywhere, auto-dismiss, stack multiple, types (success/error), manual close.
 
-## A
-Global via Context + provider holding a toast array. `useToast()` hook exposes `addToast`. Each toast auto-removes after timeout.
+## Answer
+Make it global with a Context provider that owns a `toasts` array, and expose a `useToast()` hook so any component can fire one without prop-drilling. `addToast` pushes a toast with a unique id and schedules a `setTimeout` to remove it after a duration; the provider also renders the fixed-position stack. Support types (success/error/info) via a color map and let a click dismiss manually.
 
 ## Code
 ```jsx
@@ -60,17 +60,18 @@ function Page() {
 }
 ```
 
-## How
-Provider owns the toast list + portal-like fixed container. `addToast` pushes + schedules removal. Any component calls `useToast()` — no prop drilling.
+## How it works
+The provider holds the toast list and a fixed container that maps over it. `addToast` appends a toast and calls `setTimeout(remove, duration)`; `remove` filters by id. Both are wrapped in `useCallback` so the context value stays stable and so `addToast` can safely depend on `remove`. Any descendant grabs `addToast` from `useToast()` — the provider is the only owner of the array.
 
-## Why interviewers ask
-Context API for global UI, custom hook API design, timers + cleanup, unique keys, memoized callbacks.
+## Gotchas
+- **Functional state updates are required** — `setToasts(t => [...t, next])`, not `setToasts([...toasts, next])`. Fire two toasts in the same tick with the stale-closure version and the second overwrites the first.
+- The `setTimeout` should ideally be **cleared on unmount** to avoid setting state on an unmounted provider; in practice the provider lives for the app's lifetime, but mention it.
+- Keys must be unique even for identical messages fired in the same millisecond — `Date.now() + Math.random()` (or a counter/`crypto.randomUUID()`) avoids collisions.
 
-## Extensions
-- Pause auto-dismiss on hover.
-- Slide/fade animation (CSS transition + exit state).
-- Max stack (drop oldest).
-- Portal to `document.body`. See [[Modal]].
+## Follow-ups
+- **"Pause on hover?"** Store each toast's remaining time; clear the timer on `mouseenter`, restart it on `mouseleave`.
+- **"Cap the stack?"** On add, if length ≥ max, drop the oldest (`slice(1)`) before appending.
+- **"Animate exit?"** Mark a toast `leaving`, play a CSS transition, then remove on `transitionend` — React unmounts instantly otherwise. Portal the container to `document.body` like [[Modal]].
 
 ## Related
 [[State-Management]] · [[Modal]] · [[Hooks]]

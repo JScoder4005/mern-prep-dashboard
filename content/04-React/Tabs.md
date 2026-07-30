@@ -3,8 +3,8 @@
 ## Q
 Build a reusable, accessible Tabs component. Controlled active tab, only active panel rendered.
 
-## A
-Track `activeIndex`. Render tab buttons + the active panel. Add ARIA roles + keyboard nav.
+## Answer
+Keep one source of truth — `active` (the selected index). Render the tab buttons in a `role="tablist"` and only the active panel's content below. Clicking or arrow keys update `active`. The interview signal is doing the accessibility properly: `role="tab"`/`tabpanel`, `aria-selected`, and **roving tabindex** (only the active tab is `tabIndex={0}`) so Tab enters the group once and arrow keys move between tabs.
 
 ## Code
 ```jsx
@@ -55,16 +55,18 @@ function Tabs({ tabs }) {
 />;
 ```
 
-## How
-Single source of truth `active`. Clicking or arrow keys change index; only `tabs[active].content` renders (lazy — inactive panels not mounted).
+## How it works
+`active` is the single source of truth. Clicks and arrow keys change it; the arrow handler wraps with modulo so it cycles at both ends. Only `tabs[active].content` is rendered, so inactive panels aren't mounted — cheap, but note that means their state resets when you switch away.
 
-## Why interviewers ask
-Reusable component design (data-driven via props), controlled state, ARIA (`tablist`/`tab`/`tabpanel`, `aria-selected`), keyboard nav.
+## Gotchas
+- **Roving tabindex is the part people miss:** set `tabIndex={0}` on the active tab and `-1` on the rest, or Tab stops on every tab button and keyboard users can't page past the group.
+- Rendering only the active panel **discards inactive panel state** (scroll position, form input). If that matters, keep all panels mounted and hide inactive ones with CSS instead.
+- Proper wiring links tab↔panel via `id` + `aria-controls`/`aria-labelledby`; the demo omits it for brevity but interviewers may probe.
 
-## Variations to mention
-- **Uncontrolled** (internal state) vs **controlled** (parent passes `active`+`onChange`).
-- Keep inactive panels mounted (preserve state) vs unmount (save memory) — trade-off.
-- URL-synced tabs (`?tab=settings`) for deep-linking.
+## Follow-ups
+- **"Controlled vs uncontrolled?"** Uncontrolled owns `active` internally; controlled lifts it to the parent via `active` + `onChange` props so URL/deep-linking or external logic can drive it.
+- **"Deep-linkable tabs?"** Sync `active` to a URL param (`?tab=settings`) so a shared link opens the right tab.
+- **"Lazy vs eager panels?"** Mount-on-demand saves memory; keep-mounted preserves state — call the trade-off explicitly.
 
 ## Related
-[[React-Coding-Questions]] · [[State-Management]]
+[[React-Coding-Questions]] · [[State-Management]] · [[Hooks]]

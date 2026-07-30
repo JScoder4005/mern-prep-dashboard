@@ -3,8 +3,8 @@
 ## Q
 Build a star rating: N stars, click to set, hover to preview, controlled, read-only mode, half-stars optional.
 
-## A
-Track `rating` + transient `hover`. Fill star if its index ≤ (hover || rating).
+## Answer
+The trick is **derived UI state**: keep the committed `value` (from props, controlled) plus a transient `hover` index, and fill each star when its position ≤ `hover || value`. So while the mouse is over the stars you preview the hover value; when it leaves, `hover` resets to 0 and the display falls back to the committed rating. Support a `readOnly` mode for showing existing ratings.
 
 ## Code
 ```jsx
@@ -48,16 +48,18 @@ function Demo() {
 }
 ```
 
-## How
-`hover` shows preview while mouse over; falls back to committed `value`. `starValue <= active` decides fill color.
+## How it works
+`const active = hover || value` is the whole idea — one expression that prefers the live preview and falls back to the committed value. Each star compares `starValue <= active` to pick its color. Because `value` comes from props and changes flow up through `onChange`, this is a **controlled** component; the parent owns the truth and the star just renders it.
 
-## Why interviewers ask
-Tests derived UI state (hover vs value), controlled component pattern, array rendering, accessibility.
+## Gotchas
+- **`hover || value` treats 0 as "no hover"** — that's intentional (0 is falsy, meaning "not hovering"), but it also means you can't hover-preview a rating of 0. Fine here since stars start at 1.
+- Guard every handler with `!readOnly` so a display-only rating can't be changed by clicks or hover.
+- `onChange?.(starValue)` — optional-chain the callback so an uncontrolled/display usage without `onChange` doesn't throw.
 
-## Extensions to mention
-- Half stars: compare against `active - 0.5`, use two overlaid layers or clip-path.
-- Keyboard support (arrow keys + `role="radiogroup"`).
-- Read-only display for reviews.
+## Follow-ups
+- **"Half stars?"** Compare against `active - 0.5` and render two overlaid layers (or a `clip-path`/width-based fill) per star.
+- **"Keyboard accessible?"** Wrap in `role="radiogroup"`, make each star a `radio`, and handle arrow keys to move the selection — mouse-only isn't accessible.
+- **"Controlled vs uncontrolled?"** As written it's controlled (`value`+`onChange`); for a self-contained widget, hold `value` in internal state instead.
 
 ## Related
-[[React-Coding-Questions]] · [[Hooks]]
+[[React-Coding-Questions]] · [[Hooks]] · [[State-Management]]
