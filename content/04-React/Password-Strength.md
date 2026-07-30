@@ -3,8 +3,8 @@
 ## Q
 Build a password strength meter: score rules, colored bar, live feedback.
 
-## A
-Pure scoring function → 0-4. Derive bar width/color/label from score. No extra state — compute on render.
+## Answer
+Keep exactly one piece of state — the password string — and **derive everything else on render**: a pure `scorePassword` function returns 0–4, and the bar width, color, and label come from that score. No `useEffect`, no second state for "strength"; storing what you can compute is the classic derived-state anti-pattern that leads to the two falling out of sync. Be clear that a client meter is UX only — real strength enforcement and hashing belong on the server.
 
 ## Code
 ```jsx
@@ -59,15 +59,18 @@ function PasswordStrength() {
 }
 ```
 
-## How
-`scorePassword` = pure function, testable. Component derives everything from score — no redundant state (single source = the password string).
+## How it works
+`scorePassword` is a pure, independently-testable function of the string. The component computes `score` and `level` inline every render — because they're a deterministic function of `pw`, they can never drift from it. The bar is four segments filled when `i < score`, colored by the current level. This clean split (logic vs UI) is exactly what interviewers want to see.
 
-## Why interviewers ask
-Derived state (don't store what you can compute), regex, pure functions, clean separation of logic/UI.
+## Gotchas
+- **Don't mirror score into state.** `const score = scorePassword(pw)` on render is correct; a `useState`/`useEffect` copy just adds a way to be wrong and an extra render.
+- Naive rule-based scoring is easily gamed — `"Password123!"` scores "Strong" but is terrible. Say so, and reach for entropy-based `zxcvbn` in production.
+- The meter is advisory UX; **never** treat client-side score as security. Enforce policy and hash (bcrypt/argon2) on the server — see [[Auth-JWT]].
 
-## Note
-- Client meter = UX only. **Real strength enforcement + hashing happens server-side** (bcrypt). See [[Auth-JWT]].
-- Production: use `zxcvbn` lib (entropy-based, catches "Password123!").
+## Follow-ups
+- **"Why derived over stored state?"** One source of truth (the password) can't desync; stored derived state needs an effect to keep it current and invites stale-value bugs.
+- **"Debounce it?"** Scoring is cheap so no; but if you called an API (e.g. breach check), debounce the input and cancel stale requests.
+- **"How to make scoring testable/extensible?"** Keep it a pure function with an array of rule predicates — easy to unit test and to add rules (dictionary words, repeats).
 
 ## Related
 [[React-Coding-Questions]] · [[Auth-JWT]]

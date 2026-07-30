@@ -3,8 +3,8 @@
 ## Q
 Build pagination: page numbers, prev/next, disabled edges, page window (1 … 4 5 6 … 20). Client-side and server-side.
 
-## A
-Track `currentPage`. Slice data (client) or fetch page (server). Compute total pages + a windowed page list.
+## Answer
+Track a single `page` and derive everything from it: total pages from the item count (client) or a server `total`, and the visible items by slicing local data or fetching that page. The reusable piece is the **pager** — prev/next buttons disabled at the edges plus a windowed page list with ellipses (`1 … 4 5 6 … 20`) so long ranges stay compact. Client-side (slice loaded data) suits small sets; server-side (`?page=&limit=`) is for large data, and cursor-based paging beats offset at scale.
 
 ## Code
 Client-side (slice local data):
@@ -83,13 +83,18 @@ function ServerPaginated() {
 }
 ```
 
-## How
-`slice((page-1)*size, page*size)` = current window. `getPageRange` inserts ellipsis when gap between edges and current window.
+## How it works
+`slice((page-1)*size, page*size)` extracts the current window from local data, memoized so it only recomputes when `items`/`page`/`pageSize` change. `getPageRange` always shows the first and last page, a band of `siblings` around the current page, and inserts `"..."` only when there's an actual gap — that keeps the control a fixed width no matter how many pages exist. The server variant swaps the slice for a `fetch` keyed on `page` and reads `total` from the response to compute `totalPages`.
 
-## Why / Scenario
-- Client-side: small datasets already loaded.
-- Server-side: large data — send `page`+`limit`, DB does `skip/limit` (or cursor-based for scale).
-- **Cursor pagination** (`?after=id`) beats offset for large/real-time data (no skip cost, stable).
+## Gotchas
+- **Offset pagination (`skip/limit`) drifts on live data** — inserting/deleting rows while paging causes skipped or repeated items, and deep `skip` is slow because the DB still scans the skipped rows. Cursor pagination (`?after=lastId`) is stable and O(1)-ish — see [[Indexing]].
+- Disable Prev at page 1 and Next at `totalPages`, and guard `totalPages` when `items` is empty (`Math.ceil(0/size) = 0`) so you don't render a lone broken page.
+- Give ellipsis placeholders **stable non-numeric keys** (not the index alone across renders) and never let them be clickable.
+
+## Follow-ups
+- **"Offset vs cursor pagination?"** Offset is simple and jumpable (go to page 20) but slow/unstable at scale; cursor is fast and consistent but only supports next/prev, not arbitrary jumps.
+- **"Pagination vs infinite scroll?"** Pagination gives addressable pages and a sense of bounds (good for search/tables); infinite scroll suits feeds — see [[Infinite-Scroll]].
+- **"Keep page state in the URL?"** Store `page` in the query string so refresh/back/share preserve position.
 
 ## Related
 [[Infinite-Scroll]] · [[Indexing]] · [[React-Coding-Questions]]

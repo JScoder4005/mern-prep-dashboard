@@ -3,8 +3,8 @@
 ## Q
 Build a countdown timer (and stopwatch): start, pause, reset, accurate display. Common bug: stale closure in setInterval.
 
-## A
-`useEffect` + `setInterval` while running. Use **functional updater** to avoid stale state. Clear interval on pause/unmount.
+## Answer
+Run a `setInterval` inside a `useEffect` that's gated on a `running` flag, and clear it in the cleanup on pause/unmount. The one non-negotiable detail is the **functional state updater** — `setSeconds(s => s - 1)` — because the interval callback is created once and would otherwise close over the `seconds` value from the render that started it, decrementing the same stale number forever. For a stopwatch, don't accumulate ticks (they drift); compute elapsed time from a stored start timestamp so it's accurate regardless of jitter.
 
 ## Code
 Countdown:
@@ -71,11 +71,15 @@ setInterval(() => setSeconds(seconds - 1), 1000);
 setInterval(() => setSeconds((s) => s - 1), 1000);
 ```
 
-## Why timestamp for stopwatch
-`setInterval` drifts (not exact 1000ms). Compute `Date.now() - start` → accurate regardless of tick jitter.
+## Gotchas
+- **`setInterval` is not accurate** — the browser doesn't guarantee exactly 1000ms, and throttles background tabs. For anything that must match wall-clock time, derive elapsed from `Date.now() - start` (the stopwatch pattern) rather than counting ticks.
+- **Clear the interval in cleanup** — the effect returns `() => clearInterval(id)`, which fires on pause (deps change) and unmount. Forget it and you leak intervals that keep calling `setState` on a gone component.
+- Reset must both stop (`setRunning(false)`) and restore the value; leaving `running` true restarts the countdown from the reset value.
 
-## Why interviewers ask
-Tests `useEffect` cleanup, stale closures (huge React gotcha), functional setState, timer accuracy.
+## Follow-ups
+- **"Why does the naive `setSeconds(seconds - 1)` freeze/repeat?"** The interval closes over `seconds` from its creation render; without a functional updater it subtracts from the same captured value every tick. This is the [[Closures]] loop-variable trap in React form.
+- **"How do you keep time correct across a backgrounded tab?"** Store an absolute target/`start` timestamp and recompute remaining time on each tick, so a throttled interval self-corrects when the tab refocuses.
+- **"setInterval vs recursive setTimeout?"** A self-scheduling `setTimeout` lets you adjust the delay to compensate for drift and never overlaps if a tick runs long.
 
 ## Related
 [[Hooks]] · [[Closures]] · [[Carousel]]
