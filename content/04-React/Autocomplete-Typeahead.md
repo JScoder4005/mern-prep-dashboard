@@ -3,8 +3,8 @@
 ## Q
 Build an autocomplete: debounced API search, dropdown suggestions, keyboard nav (up/down/enter/esc), click select, loading state.
 
-## A
-Debounce input → fetch suggestions → render dropdown → handle keyboard highlight + selection. Cancel stale requests.
+## Answer
+This is one of the richest single-component questions because it stacks four hard things: **debounce** the input so you don't fetch on every keystroke, **cancel stale requests** so out-of-order responses can't show wrong results, render a dropdown, and make it **keyboard accessible** (up/down to move the highlight, Enter to select, Escape to close). The debounce + `AbortController` cleanup living together in one `useEffect` keyed on `query` is the elegant core — every keystroke tears down the previous pending timer and request.
 
 ## Code
 ```jsx
@@ -77,17 +77,19 @@ function Autocomplete({ fetchSuggestions }) {
 }
 ```
 
-## How
-`setTimeout` 300ms debounces. `AbortController` cancels in-flight request when query changes → no out-of-order results. Keyboard moves `active`; Enter selects.
-
-## Why interviewers ask
-Combines debounce + async + race handling + keyboard a11y — one of the richest single components. See [[Debounce-Throttle]].
+## How it works
+The effect runs on every `query` change: it starts a 300ms `setTimeout`, and its cleanup both `clearTimeout`s the pending timer and `abort()`s the in-flight request. So fast typing keeps resetting the debounce, and a settled request whose query is already stale gets aborted before it can call `setResults`. Keyboard handling moves an `active` index over the results; the highlighted row is styled and selected on Enter.
 
 ## Gotchas
-- **Cancel stale requests** (AbortController) → avoid showing old results.
-- `onMouseDown` not `onClick` (fires before input `blur` closes dropdown).
-- Reset `active` on new results.
-- Close on Escape / outside click.
+- **Race conditions are the real test.** Without `AbortController` (or a request-id guard), a slow response for "reac" can land *after* "react" and overwrite the correct list. Cancel on every change.
+- **`onMouseDown`, not `onClick`, to select** — clicking a suggestion blurs the input first, and a blur handler that closes the dropdown would unmount the item before `click` fires. `mousedown` runs before blur.
+- Reset `active` to -1 whenever new results arrive, or the highlight points at a stale row.
+- Close on Escape *and* outside click (a `mousedown` listener on `document`), and debounce is UX vs cost — 200–300ms is typical.
+
+## Follow-ups
+- **"Debounce vs throttle here?"** Debounce — you want to fire once after typing pauses, not at a steady rate. See [[Debounce-Throttle]].
+- **"How else can you kill stale responses without AbortController?"** Track a monotonically increasing request id (or the query string) and ignore any response that isn't the latest.
+- **"Accessibility?"** Use the ARIA combobox pattern: `role="combobox"`/`listbox`/`option`, `aria-activedescendant` for the highlighted item, and `aria-expanded`.
 
 ## Related
 [[Debounce-Throttle]] · [[React-Coding-Questions]] · [[Async-Promises]]

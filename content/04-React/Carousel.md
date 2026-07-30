@@ -3,8 +3,8 @@
 ## Q
 Build a carousel: prev/next, dots, auto-play, wrap-around, pause on hover.
 
-## A
-Track `index`. Prev/next with modulo wrap. `useEffect` interval for autoplay, cleared on hover/unmount.
+## Answer
+Track a single `index`. Prev/next use modulo so they wrap at both ends (`(i + 1) % len` forward, `(i - 1 + len) % len` backward — the `+ len` matters because JS `%` can go negative). Autoplay is a `setInterval` inside a `useEffect`, cleared on unmount and whenever a `paused` flag (set on hover) is true. Dots are derived UI — the active one is just `i === index`.
 
 ## Code
 ```jsx
@@ -52,17 +52,18 @@ function Carousel({ images, interval = 3000 }) {
 }
 ```
 
-## How
-Modulo `(i + 1) % len` wraps forward; `(i - 1 + len) % len` wraps backward. Autoplay via interval in effect, paused flag stops it, cleanup prevents leak.
+## How it works
+`next` is `useCallback`-memoized on `images.length` so the autoplay effect gets a stable reference and doesn't recreate the interval every render. The effect early-returns when `paused`, otherwise sets an interval calling `next` and clears it on cleanup — so hovering (which sets `paused`) tears the interval down, and leaving restarts it. The dots map over images and highlight `i === index`.
 
-## Why interviewers ask
-Timer + cleanup, wrap-around math, derived UI (active dot), event handling.
+## Gotchas
+- **Autoplay + manual nav fight over the timer.** If a click doesn't reset the interval, the next auto-advance can fire almost immediately after a manual one. Include `next` (or the index) in the effect deps so each change restarts the timer cleanly.
+- **`%` on a negative number stays negative** in JS — `(-1) % 3 === -1`, not `2`. Always `(i - 1 + len) % len` for backward wrap.
+- Clear the interval on unmount (the effect return) or it keeps calling `setState` after the carousel is gone.
 
-## Extensions
-- Slide animation: `transform: translateX(-index*100%)` on a flex track + CSS transition.
-- Swipe (touch events).
-- Lazy-load images.
-- Keyboard arrows.
+## Follow-ups
+- **"Smooth slide animation?"** Render all slides in a flex track and animate `transform: translateX(-index * 100%)` with a CSS transition, instead of swapping a single `<img>`.
+- **"Touch/swipe support?"** Track `touchstart`/`touchend` X delta and advance when it passes a threshold.
+- **"Accessibility?"** Pause on focus as well as hover, label dots as buttons, support arrow keys, and respect `prefers-reduced-motion` by disabling autoplay.
 
 ## Related
 [[Hooks]] · [[Countdown-Timer]]

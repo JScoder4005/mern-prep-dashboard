@@ -3,8 +3,8 @@
 ## Q
 Build a multi-step form: next/back, per-step validation, shared form data, progress indicator, submit at end.
 
-## A
-One `step` index + one `formData` object shared across steps. Validate current step before advancing. Submit on last step.
+## Answer
+Keep two pieces of state: a `step` index and one shared `data` object spanning all steps — not separate state per step, so nothing is lost when you go back. `step` decides which fields render; `validate()` checks only the current step's fields and gates `next`/`submit`. Persisting all fields in one object is the key design point: back/next just changes which slice you show, and the final submit sends the whole object.
 
 ## Code
 ```jsx
@@ -79,17 +79,19 @@ function Wizard() {
 }
 ```
 
-## How
-Single `data` object persists across steps (spread-merge on change). `step` decides which fields render. `validate()` gates `next`/`submit`.
+## How it works
+`update(field)` is a curried handler returning an `onChange` that spread-merges one field into `data` immutably, so every input is controlled off the same object. `next` runs `validate()` (which only inspects the current `step`'s fields, writing an `errors` map) and advances only if it returns true; `back` just decrements. The last step renders a review and swaps the Next button for Submit.
 
-## Why interviewers ask
-State management across steps, controlled inputs, conditional rendering, validation, immutable updates.
+## Gotchas
+- **One shared object, not per-step state** — separate `useState` per step loses earlier answers on back-navigation and makes the final submit awkward.
+- **Immutable merges only:** `setData(d => ({ ...d, [field]: value }))`. Mutating `data` directly won't re-render and corrupts history.
+- Re-validate on **submit**, not just on each `next` — a user can edit an earlier step then jump forward; the final gate must recheck everything.
+- Client validation is UX; the server must validate again (never trust the client).
 
-## Scale-ups to mention
-- Config-driven steps (array of field schemas).
-- `useReducer` for complex form state. See [[Hooks]].
-- Libraries: React Hook Form + Zod/Yup for real validation.
-- Persist to localStorage so refresh doesn't lose progress. See [[React-Coding-Questions]] (useLocalStorage).
+## Follow-ups
+- **"When would you switch to `useReducer`?"** When step transitions and validation get complex — a reducer centralizes "NEXT/BACK/SET_FIELD/SET_ERRORS" transitions and is easier to test. See [[Hooks]].
+- **"Real-world validation?"** React Hook Form + Zod/Yup schemas per step — declarative rules, less boilerplate, typed data.
+- **"Survive a refresh?"** Persist `data` (and `step`) to localStorage on change and rehydrate on mount — see the `useLocalStorage` hook in [[React-Coding-Questions]].
 
 ## Related
 [[React-Coding-Questions]] · [[State-Management]] · [[Hooks]]

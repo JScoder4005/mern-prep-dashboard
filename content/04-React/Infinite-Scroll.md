@@ -3,8 +3,8 @@
 ## Q
 Build infinite scroll: load more when user nears the bottom. Use IntersectionObserver.
 
-## A
-Put a sentinel element after the list. `IntersectionObserver` fires when it enters the viewport → fetch next page. Cleaner than scroll-event math + throttling.
+## Answer
+Place an empty **sentinel** element after the list and watch it with an `IntersectionObserver`; when it scrolls into view, fetch the next page and append. This beats the old `scrollTop + clientHeight >= scrollHeight` approach — no scroll-event throttling, the browser does the intersection check off the main thread, and it's far fewer re-renders. Add a `rootMargin` so you prefetch *before* the user hits the bottom, and guard against double-fires while a load is in flight.
 
 ## Code
 IntersectionObserver hook:
@@ -54,22 +54,23 @@ function Feed() {
 }
 ```
 
-## How
-Observer watches the sentinel div. When it scrolls into view (with 200px margin = prefetch), callback loads next page and appends.
+## How it works
+The hook creates an `IntersectionObserver` with `rootMargin: "200px"` (fire when the sentinel is still 200px below the fold) and observes the sentinel ref. When it intersects, it calls the `loadMore` callback. Re-creating the observer when `callback`/`hasMore` change keeps it pointed at the latest closure and stops observing once there's nothing left to load. `loadMore` is `useCallback`-memoized and appends with a functional update so pages accumulate.
 
-## Why IntersectionObserver over scroll event
-- No manual `scrollTop + clientHeight >= scrollHeight` math.
-- No throttle/debounce needed — browser batches it, off main thread.
-- Fewer re-renders.
+## Why IntersectionObserver over a scroll listener
+- No manual `scrollTop + clientHeight >= scrollHeight` math and no throttle/debounce.
+- The browser batches intersection checks off the main thread → smoother scrolling, fewer renders.
 
 ## Gotchas
-- Guard against double-fire (`loading` flag).
-- Stop when `hasMore` false.
-- Cleanup observer on unmount.
-- For huge lists also virtualize (react-window) to cap DOM nodes.
+- **Double-fire guard is essential** — the observer can fire again before the fetch resolves; the `loading` flag (and `hasMore`) prevents stacking duplicate requests and duplicate items.
+- **Recreate/re-observe when the callback changes.** A stale `loadMore` closure will fetch the wrong page; that's why `callback` is in the effect deps.
+- Unobserve/disconnect on cleanup, and detect the last page (fewer than `limit` items) to flip `hasMore` off.
+- Infinite scroll alone doesn't cap DOM size — pair it with **virtualization** (react-window) for very long feeds.
 
-## Scenario
-Social feeds, search results, product listings, chat history (reverse scroll).
+## Follow-ups
+- **"Infinite scroll vs pagination?"** Infinite scroll suits feeds/discovery; pagination gives addressable, bounded pages (search, tables). See [[Pagination]].
+- **"Downsides of infinite scroll?"** No footer access, lost scroll position on back-nav, and unbounded memory/DOM growth without virtualization.
+- **"Reverse (chat) scroll?"** Observe a sentinel at the *top* and preserve scroll position by measuring height before/after prepending older messages.
 
 ## Related
 [[Pagination]] · [[Performance-Optimization]] · [[Debounce-Throttle]]
