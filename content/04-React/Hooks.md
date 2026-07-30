@@ -1,58 +1,62 @@
 # React Hooks
 
 ## Q
-Explain core hooks. `useEffect` deps/cleanup. `useMemo` vs `useCallback`. Rules of hooks.
+Explain the core hooks. How do `useEffect` dependencies and cleanup work? `useMemo` vs `useCallback`. What are the rules of hooks?
 
-## A
-Hooks add state/lifecycle to function components. Called **top level only**, same order every render (no conditionals/loops).
+## Answer
+Hooks let function components hold state and tap into lifecycle/side-effects without classes. The rule that makes them work: call them **only at the top level, in the same order every render** — never inside conditionals, loops, or nested functions — because React tracks each hook by call order, not by name. The everyday set is `useState` (local state), `useEffect` (side effects + cleanup), `useRef` (a mutable box that doesn't trigger re-render), `useMemo`/`useCallback` (caching), `useContext` (read a provider), and `useReducer` (state via a reducer).
+
+## How it works
+React keeps a per-component list of hook "slots" and walks it in order on every render — that's why the order must be stable. `useState`'s setter schedules a re-render; use the **functional form** `setCount(c => c + 1)` when the next value depends on the previous to avoid stale reads. `useEffect` runs *after* paint; its dependency array decides when it re-runs, and the function you return is the **cleanup**, invoked before the next run and on unmount.
 
 ## Code
 ```jsx
-// useState
+// useState — functional update avoids stale values
 const [count, setCount] = useState(0);
-setCount((c) => c + 1);        // functional update (avoids stale value)
+setCount((c) => c + 1);
 
-// useEffect - run after render
+// useEffect — runs after render; return a cleanup
 useEffect(() => {
   const id = setInterval(tick, 1000);
-  return () => clearInterval(id); // CLEANUP: on unmount + before re-run
-}, [dep]);                        // deps: [] once, [dep] on change, none=every render
+  return () => clearInterval(id); // cleanup: on unmount + before each re-run
+}, [dep]);                        // [] = once, [dep] = on change, omitted = every render
 
-// useRef - mutable box, no re-render
+// useRef — mutable box, no re-render on change
 const inputRef = useRef(null);
-inputRef.current.focus();
+inputRef.current?.focus();
 
-// useMemo - cache VALUE
-const sorted = useMemo(() => list.sort(cmp), [list]);
+// useMemo — cache a VALUE
+const sorted = useMemo(() => [...list].sort(cmp), [list]);
 
-// useCallback - cache FUNCTION reference
+// useCallback — cache a FUNCTION reference
 const handler = useCallback(() => doThing(id), [id]);
 
-// useContext
+// useContext — read the nearest provider's value
 const theme = useContext(ThemeContext);
-
-// useReducer - complex state (see React-Coding-Questions)
 ```
 
 ## useEffect deps — the #1 bug source
 | Deps | Runs |
 |---|---|
-| none | after every render |
-| `[]` | once (mount) |
-| `[a,b]` | when a or b change |
-| missing a used var | **stale closure bug** |
+| omitted | after every render |
+| `[]` | once (on mount) |
+| `[a, b]` | when `a` or `b` change |
+| a used var left out | **stale-closure bug** |
 
 ## useMemo vs useCallback
-- `useMemo(fn, deps)` → caches **return value**.
-- `useCallback(fn, deps)` → caches the **function itself**.
-- `useCallback(fn, d)` === `useMemo(() => fn, d)`.
+- `useMemo(fn, deps)` caches the **return value** of `fn`.
+- `useCallback(fn, deps)` caches the **function itself** (a stable reference).
+- Identity: `useCallback(fn, d)` ≡ `useMemo(() => fn, d)`.
 
-## Why
-Cleanup prevents leaks (timers, subscriptions, listeners). Memo prevents expensive recompute + unnecessary child re-render (with `React.memo`).
+## Gotchas
+- **Stale closures:** an effect/callback captures the variables from the render it was created in. Leave a used value out of the deps and it keeps reading the old one — the classic `setInterval` reading a frozen `count`. Fix with the functional updater or by listing the dep.
+- **Don't over-memoize.** `useMemo`/`useCallback` cost memory + comparison; they only pay off when feeding a memoized child or guarding genuinely expensive compute.
+- Mutating `ref.current` never re-renders — great for timers/previous-value, wrong for anything the UI must reflect.
 
-## Where / Scenario
-- `useCallback`/`useMemo` — only when passing to memoized children or heavy compute. Don't over-use.
-- `useRef` — DOM access, store previous value, mutable flag (avoid setState).
+## Follow-ups
+- **"Why must hooks run in the same order?"** React has no hook names — it maps the Nth `useState` call to the Nth slot. A conditional hook shifts every slot after it and corrupts state.
+- **"useLayoutEffect vs useEffect?"** `useLayoutEffect` fires synchronously after DOM mutation, before paint — use it to measure/adjust layout and avoid flicker; otherwise prefer `useEffect`.
+- **"Custom hooks?"** Just a function calling other hooks, named `useX`, to share stateful logic — no magic beyond the naming convention.
 
 ## Related
 [[Performance-Optimization]] · [[React-Coding-Questions]] · [[Closures]]
