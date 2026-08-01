@@ -3,8 +3,8 @@
 ## Q
 How does Node handle concurrency on a single thread? Explain libuv phases. Worker threads vs cluster?
 
-## A
-Node is single-threaded for JS but uses **libuv** (C++ thread pool + OS async) for I/O. Non-blocking I/O + event loop = handles thousands of connections without threads per request. CPU-bound work still blocks → offload to worker threads / cluster.
+## Answer
+JS itself runs on a single thread, but Node offloads I/O to **libuv** — a C++ layer that uses the OS's async facilities (epoll/kqueue) for network I/O and a small thread pool for things like file/DNS/crypto that don't have an async OS primitive. The event loop just cycles through fixed phases, running whatever callbacks became ready, so one thread can juggle thousands of concurrent connections without a thread per request. The catch: that single JS thread is still one thread — a synchronous CPU-heavy computation blocks the loop and stalls every other request until it finishes, which is what worker threads and clustering exist to route around.
 
 ## Code
 Non-blocking demo:
@@ -46,16 +46,19 @@ new Worker("./heavy.js"); // runs on separate thread, no block main
 | `cluster` | fork multiple processes (1 per CPU core), scale HTTP across cores, shared port |
 | `worker_threads` | offload CPU-heavy compute in same process, shared memory |
 
-## How
-libuv thread pool (default 4) handles fs/dns/crypto. Network I/O uses OS async (epoll/kqueue). JS callbacks run on the single main thread when events ready.
+## How it works
+The libuv thread pool (4 threads by default) handles the syscalls that don't have a native async OS interface — `fs`, DNS lookups, some crypto. True network I/O (sockets, HTTP) uses the OS's async event notification directly, no thread pool needed. Either way, the actual JS callback always runs back on the single main thread once its event is ready, and between every phase Node drains microtasks — `process.nextTick` first, then resolved Promises — before moving to the next phase, which is why `nextTick`/`Promise.then` consistently beat `setTimeout(0)`/`setImmediate`.
 
-## Why
-Event-driven = high throughput for I/O-bound apps (typical web API). Blocking the loop (sync loop, JSON.parse huge) freezes all requests.
+## Gotchas
+- **A synchronous CPU-bound loop (huge `JSON.parse`, a tight `for` loop, sync crypto) blocks everyone**, not just the request that triggered it — there's only one JS thread to stall.
+- **`process.nextTick` starves the event loop if called recursively** — it drains fully before the loop can proceed to I/O, so a `nextTick` that re-queues itself can freeze timers/I/O indefinitely.
+- **The libuv pool size (default 4) becomes a bottleneck under fs/crypto-heavy load** — `UV_THREADPOOL_SIZE` can be raised, but that's a knob for a real production bottleneck, not something to tune preemptively.
+- **`cluster` gives you separate processes (separate memory)**; `worker_threads` gives you threads that can share memory via `SharedArrayBuffer` — picking the wrong one means either unnecessary IPC overhead or unwanted shared mutable state.
 
-## Where / Scenario
-- API server handling many concurrent DB/HTTP calls.
-- Never do heavy sync compute on main thread — offload.
-- Scale prod: cluster / PM2 across cores.
+## Follow-ups
+- **"How do you handle a CPU-heavy endpoint (e.g. image resize) without blocking the API?"** Move it to a `Worker` thread or a separate queue/worker process (BullMQ + Redis), and have the endpoint return quickly with a job id.
+- **"Why does `setImmediate` sometimes run before `setTimeout(fn, 0)` and sometimes after?"** Order depends on whether they're scheduled inside an I/O callback (poll phase) — there `setImmediate` reliably wins — versus the main module (order is not guaranteed there).
+- **"How do you scale a Node API across CPU cores?"** `cluster` (or PM2 in cluster mode) forks one process per core, all sharing the same listening port via the OS — each core gets its own event loop and V8 heap.
 
 ## Related
 [[Event-Loop]] · [[Streams-Buffers]]

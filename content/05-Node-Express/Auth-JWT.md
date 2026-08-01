@@ -3,8 +3,8 @@
 ## Q
 Explain JWT auth flow. Access vs refresh token. Where to store tokens? bcrypt why?
 
-## A
-JWT = signed token `header.payload.signature`. Server signs on login, client sends it on each request, server verifies signature (stateless — no session store). Passwords hashed with bcrypt (slow + salted).
+## Answer
+A JWT is a signed `header.payload.signature` blob the server issues on login and the client resends on every request — the server just verifies the signature, so no session store is needed and it scales horizontally. The real design decision is splitting into a short-lived **access token** (15m, sent per-request, kept in memory) and a long-lived **refresh token** (7d, httpOnly cookie, only used to mint new access tokens): a leaked access token expires fast, a leaked refresh token is the expensive case and needs rotation/revocation. Passwords never touch this — they're hashed with bcrypt (salted + deliberately slow) so a DB leak doesn't hand out plaintext credentials.
 
 ## Code
 Signup — hash password:
@@ -63,19 +63,16 @@ app.post("/refresh", (req, res) => {
 | Storage | memory / header | httpOnly cookie |
 | Leak impact | small (expires fast) | big → rotate + store server-side |
 
-## Where to store (security)
-- **Access** — memory (JS var). Avoid localStorage (XSS risk).
-- **Refresh** — httpOnly + secure cookie (JS can't read → XSS-safe; add CSRF protection / sameSite).
+## Gotchas
+- **Never put the access token in localStorage** — any XSS on the page can read it. Keep it in memory (a JS variable / React state) and re-fetch on reload via the refresh cookie.
+- **Refresh token must be httpOnly + secure + sameSite** — JS can't read it (XSS-safe) and the browser won't send it cross-site (CSRF-resistant), but pair with CSRF tokens for state-changing requests if you also accept the cookie on non-idempotent routes.
+- **Stateless JWTs can't be revoked mid-life** — "logout everywhere" or a compromised account needs either a short access-token TTL you just wait out, or a server-side blacklist/rotation table for refresh tokens (which reintroduces state, on purpose, for the token that matters).
+- **bcrypt rounds are a tunable cost, not a fixed constant** — bump the salt-round count as hardware gets faster; too low and offline brute-force gets cheap.
 
-## Why
-- Short access limits leak window. Refresh avoids re-login.
-- bcrypt slow + salted → resists brute force / rainbow tables.
-- Stateless JWT scales horizontally (no shared session store).
-
-## Where / Scenario
-- SPA + REST API auth.
-- Logout = clear cookie + refresh token blacklist/rotation.
-- Session-based (cookie + server store) alternative when you need instant revoke.
+## Follow-ups
+- **"How do you revoke a compromised refresh token?"** Store issued refresh tokens (or their hash) server-side with a revoked flag; check it on `/refresh`. Rotate on every use so a stolen token that's already been redeemed is detected.
+- **"Why not just one long-lived token?"** Then every leak is a full-session compromise for its whole lifetime — splitting access/refresh bounds the blast radius of the token that's actually exposed on every request.
+- **"Session cookies vs JWT — when would you pick sessions?"** When you need instant revoke or need to store more server-side state per user than fits in a token payload; JWT wins when you need to scale reads across servers without a shared session store.
 
 ## Related
 [[Middleware]] · [[Error-Handling]] · [[Core-Services]]
